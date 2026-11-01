@@ -1,0 +1,64 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "dotnet.defaultSolution": "AmbulanceSite.sln"
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Запустити сайт",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${workspaceFolder}/AmbulanceSite/bin/Debug/net8.0/AmbulanceSite.dll",
+        "cwd": "${workspaceFolder}/AmbulanceSite",
+        "stopAtEntry": false,
+        "console": "integratedTerminal",
+        "env": {
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "ASPNETCORE_URLS": "http://localhost:5080"
+        },
+        "serverReadyAction": {
+          "action": "openExternally",
+          "pattern": "Now listening on:\\s+(https?://\\S+)"
+        }
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "build",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+          "build",
+          "${workspaceFolder}/AmbulanceSite/AmbulanceSite.csproj"
+        ],
+        "problemMatcher": "$msCompile",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        }
+      },
+      {
+        "label": "run",
+        "type": "process",
+        "command": "dotnet",
+        "args": [
+          "run",
+          "--project",
+          "${workspaceFolder}/AmbulanceSite/AmbulanceSite.csproj"
+        ],
+        "problemMatcher": "$msCompile",
+        "isBackground": true
+      }
+    ]
+  }
+}

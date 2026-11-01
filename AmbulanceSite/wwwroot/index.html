@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Служба швидкої допомоги</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">+</div>
+    <div>
+      <h1>Служба швидкої допомоги</h1>
+      <p>Диспетчерська система · база даних <code>ambulance_service</code></p>
+    </div>
+  </div>
+  <div id="dbStatus" class="chip">Підключення…</div>
+</header>
+
+<nav id="tabs">
+  <button data-tab="dispatch" class="active">Диспетчерська</button>
+  <button data-tab="calls">Виклики</button>
+  <button data-tab="patients">Пацієнти</button>
+  <button data-tab="shifts">Зміни та бригади</button>
+  <button data-tab="dirs">Довідники</button>
+  <button data-tab="reports">Звіти</button>
+  <button data-tab="tables">Таблиці БД</button>
+  <button data-tab="integrity">Цілісність</button>
+</nav>
+
+<main>
+  <section id="dispatch" class="tab active">
+    <div class="card">
+      <h2>Новий виклик</h2>
+      <form id="callForm" class="formrow">
+        <label>Пацієнт<select name="patientId" id="selPatient" required></select></label>
+        <label>Адреса виклику<select name="addressId" id="selAddress" required></select></label>
+        <label class="grow">Симптоми<input name="symptoms" required placeholder="напр. біль у грудях, задишка"></label>
+        <label>Пріоритет<select name="priority"><option>високий</option><option selected>середній</option><option>низький</option></select></label>
+        <label>Диспетчер<select name="dispatcherId" id="selDispatcher" required></select></label>
+        <button class="primary">Зареєструвати</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Активні виклики <span class="muted">(статус «зареєстровано» або «в дорозі», сортування за пріоритетом)</span></h2>
+      <div id="activeCalls"></div>
+    </div>
+  </section>
+
+  <section id="calls" class="tab">
+    <div class="card">
+      <h2>Усі виклики <span class="muted">натисніть на рядок, щоб відкрити діагнози та госпіталізації</span></h2>
+      <div id="allCalls"></div>
+    </div>
+    <div class="card" id="callDetails" hidden>
+      <h2 id="detTitle"></h2>
+      <div class="grid">
+        <div>
+          <h3>Діагнози</h3>
+          <div id="detDiag"></div>
+          <form id="diagForm" class="inline">
+            <select name="diagnosisId" id="selDiagnosis"></select>
+            <select name="type"><option>попередній</option><option>остаточний</option></select>
+            <button>Додати діагноз</button>
+          </form>
+        </div>
+        <div>
+          <h3>Госпіталізації</h3>
+          <div id="detHosp"></div>
+          <form id="hospForm" class="stack">
+            <select name="hospitalId" id="selHospital"></select>
+            <input name="department" placeholder="Відділення" required>
+            <select name="admissionStatus"><option>госпіталізовано</option><option>переведено</option><option>відмовлено</option></select>
+            <select name="previousId" id="selPrevHosp"><option value="">— перша госпіталізація —</option></select>
+            <button>Додати госпіталізацію</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="patients" class="tab">
+    <div class="grid">
+      <div class="card">
+        <h2>Новий пацієнт</h2>
+        <form id="patientForm">
+          <label>ПІБ<input name="fullName" required></label>
+          <div class="row2">
+            <label>Дата народження<input type="date" name="birthDate" required></label>
+            <label>Група крові<select name="bloodType"><option>O+</option><option>O-</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option></select></label>
+          </div>
+          <label>Телефон<input name="phone" placeholder="0991234567"></label>
+          <div class="row3">
+            <label>Місто<input name="city" value="Рівне" required></label>
+            <label>Вулиця<input name="street" required placeholder="вул. ..."></label>
+            <label>Будинок<input name="building" required></label>
+          </div>
+          <button class="primary">Додати пацієнта</button>
+        </form>
+      </div>
+      <div class="card wide">
+        <h2>Пацієнти</h2>
+        <div id="patientList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="shifts" class="tab">
+    <div class="grid">
+      <div class="card">
+        <h2>Сформувати зміну</h2>
+        <form id="shiftForm">
+          <label>Початок<input type="datetime-local" name="start" required></label>
+          <label>Кінець<input type="datetime-local" name="end"></label>
+          <div class="row2">
+            <label>Тип бригади<select name="crewType"><option>лікарська</option><option>фельдшерська</option><option>парамедиків</option></select></label>
+            <label>Автомобіль<select name="vehicleId" id="selVehicle"></select></label>
+          </div>
+          <h3>Склад бригади</h3>
+          <div id="members"></div>
+          <button class="primary">Створити зміну</button>
+        </form>
+      </div>
+      <div class="card wide">
+        <h2>Зміни та склад бригад</h2>
+        <div id="shiftList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="dirs" class="tab">
+    <div class="card">
+      <h2>Довідники <span class="muted">додавання та видалення записів</span></h2>
+      <div id="dirButtons" class="pills"></div>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <h2 id="dirFormTitle"></h2>
+        <form id="dirForm"></form>
+      </div>
+      <div class="card wide">
+        <h2 id="dirListTitle"></h2>
+        <div id="dirList"></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="reports" class="tab">
+    <div class="card">
+      <h2>Запити та звіти <span class="muted">(запити 1–7 з підрозділу 3.2)</span></h2>
+      <div id="reportButtons" class="reportlist"></div>
+      <div class="params">
+        <label>Виклик для запиту 6<input type="number" id="pCall" value="2" min="1"></label>
+        <label>Працівник для запиту 7<select id="pStaff"></select></label>
+        <label>Період з<input type="date" id="pFrom" value="2026-10-01"></label>
+        <label>по<input type="date" id="pTo" value="2026-10-31"></label>
+      </div>
+    </div>
+    <div class="card" id="reportOut" hidden>
+      <h2 id="reportTitle"></h2>
+      <pre class="sql" id="reportSql"></pre>
+      <div id="reportTable"></div>
+    </div>
+  </section>
+
+  <section id="tables" class="tab">
+    <div class="card">
+      <h2>Вміст таблиць бази даних</h2>
+      <div id="tableButtons" class="pills"></div>
+    </div>
+    <div class="card" id="tableOut" hidden>
+      <pre class="sql" id="tableSql"></pre>
+      <div id="tableData"></div>
+    </div>
+  </section>
+
+  <section id="integrity" class="tab">
+    <div class="card">
+      <h2>Перевірка обмежень цілісності</h2>
+      <p class="muted">Кожен запит навмисно порушує одне з обмежень, заданих у DDL-скрипті. СКБД має відхилити його з помилкою. Запити виконуються в транзакції з відкатом, тому дані не змінюються.</p>
+      <div id="integrityList" class="tests"></div>
+    </div>
+    <div class="card">
+      <h2>Скидання бази даних</h2>
+      <p class="muted">Повторно виконує скрипти <code>01_schema.sql</code> і <code>02_data.sql</code>: база перестворюється з початковими тестовими даними.</p>
+      <button id="resetBtn" class="danger">Перестворити базу даних</button>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+<script src="app.js"></script>
+</body>
+</html>
